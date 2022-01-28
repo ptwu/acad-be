@@ -124,3 +124,27 @@ func getUser(id string) (models.User, error) {
 
 	return user, err
 }
+
+func updateUser(id int64, user models.User) int64 {
+	db := createConnection()
+
+	defer db.Close()
+
+	sqlStatement := `UPDATE users SET name=$2, location=$3, age=$4 WHERE userid=$1`
+
+	res, err := db.Exec(sqlStatement, id, user.Name, user.Location, user.Age)
+
+	if err != nil {
+			log.Fatalf("Unable to execute the query. %v", err)
+	}
+
+	rowsAffected, err := res.RowsAffected()
+
+	if err != nil {
+			log.Fatalf("Error while checking the affected rows. %v", err)
+	}
+
+	fmt.Printf("Total rows/record affected %v", rowsAffected)
+
+	return rowsAffected
+}
