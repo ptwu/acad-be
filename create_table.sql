@@ -6,6 +6,4 @@ CREATE TABLE users (
   reviewPoints INT,
   lastLearned BIGINT,
   usesTraditional BOOLEAN,
-  age INT,
-  location TEXT
 );

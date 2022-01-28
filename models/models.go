@@ -1,8 +1,11 @@
 package models
 
 type User struct {
-    ID       int64  `json:"id"`
-    Name     string `json:"name"`
-    Location string `json:"location"`
-    Age      int64  `json:"age"`
+    ID              string `json:"id"`
+    Streak          int64  `json:"name"`
+    HighestStreak   int64  `json:"highestStreak"`
+    TotalLearned    int64  `json:"totalLearned"`
+		ReviewPoints    int64  `json:"reviewPoints"`
+		LastLearned     int64  `json:"lastLearned"`
+		UsesTraditional bool   `json:"usesTraditional"`
 }
