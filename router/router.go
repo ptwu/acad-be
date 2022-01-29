@@ -10,6 +10,6 @@ func Router() *mux.Router {
     router.HandleFunc("/api/create-user", middleware.CreateUser).Methods("POST", "OPTIONS")
     router.HandleFunc("/api/user/{id}", middleware.GetUser).Methods("GET", "OPTIONS")
 		router.HandleFunc("/api/switch-basis/{id}", middleware.SwitchBasis).Methods("POST", "OPTIONS")
-		router.HandleFunc("/api/review-card/{id}", middleware.SwitchBasis).Methods("POST", "OPTIONS")
+		router.HandleFunc("/api/review-card/{id}", middleware.ReviewCard).Methods("POST", "OPTIONS")
     return router
 }
