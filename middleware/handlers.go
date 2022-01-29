@@ -106,6 +106,8 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 func SwitchBasis(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	params := mux.Vars(r)
 	istraditionalStr := r.URL.Query().Get("is-traditional")
@@ -130,6 +132,8 @@ func SwitchBasis(w http.ResponseWriter, r *http.Request) {
 func ReviewCard(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	params := mux.Vars(r)
 	err := markCurrentCardReviewed(params["id"])
