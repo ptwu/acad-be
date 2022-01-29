@@ -7,10 +7,9 @@ import (
     "acad-be/models"
     "log"
     "net/http"
-    "os"
 		"time"
-    "strconv"
-		"github.com/google/uuid"
+		"os"
+		"strconv"
     "github.com/gorilla/mux" 
     "github.com/joho/godotenv"
     _ "github.com/lib/pq"
@@ -28,7 +27,27 @@ func createConnection() *sql.DB {
 			log.Fatalf("Error loading .env file")
 	}
 
-	db, err := sql.Open("postgres", os.Getenv("POSTGRES_URL"))
+	var dbUser string = os.Getenv("DB_USER")
+	var dbHost string = os.Getenv("DB_HOST")
+	var dbPort int
+	dbPort, err = strconv.Atoi(os.Getenv("DB_PORT"))
+	if err != nil {
+		log.Fatalf("Unable to convert the string into int.  %v", err)
+	}
+	var dbPassword = os.Getenv("DB_PASS")
+	var dbName = os.Getenv("DB_NAME")
+
+	if err != nil {
+		panic("configuration error: " + err.Error())
+	}
+	if err != nil {
+		panic("failed to create authentication token: " + err.Error())
+	}
+
+	db, err := sql.Open("postgres", 
+		fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
+		dbHost, dbPort, dbUser, dbPassword, dbName))
+
 	if err != nil {
 			panic(err)
 	}
@@ -42,7 +61,7 @@ func createConnection() *sql.DB {
 	return db
 }
 
-// CreateUser create a user in the postgres db
+// ROUTES
 func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -76,22 +95,18 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 // HANDLERS
 func createUser() string {
 	db := createConnection()
-
 	defer db.Close()
 
-	newUuid := uuid.New().String()
-	sqlStatement := `INSERT INTO users VALUES ($1, $2, $3, $4, $5, $6, $7)`
-
-
-	err := db.QueryRow(sqlStatement, newUuid, 0, 0, 0, 0, time.Now().Unix(), false)
-
+	sqlStatement := 
+		`INSERT INTO users (streak, higheststreak, totallearned, reviewpoints, lastlearned, usestraditional) VALUES ($1, $2, $3, $4, $5, $6) RETURNING userid`
+	var uuid string
+	err := db.QueryRow(sqlStatement, 0, 0, 0, 0, time.Now().Unix(), false).Scan(&uuid)
 	if err != nil {
 			log.Fatalf("Unable to execute the query. %v", err)
 	}
-
-	fmt.Printf("Inserted a single record %v", newUuid)
-
-	return newUuid
+	fmt.Printf("Inserted a single record %v", uuid)
+	
+	return uuid
 }
 
 func getUser(id string) (models.User, error) {
@@ -125,26 +140,27 @@ func getUser(id string) (models.User, error) {
 	return user, err
 }
 
-func updateUser(id int64, user models.User) int64 {
-	db := createConnection()
+// func updateUser(id int64, user models.User) int64 {
+// 	db := createConnection()
 
-	defer db.Close()
+// 	defer db.Close()
 
-	sqlStatement := `UPDATE users SET name=$2, location=$3, age=$4 WHERE userid=$1`
+// 	sqlStatement := `UPDATE users SET name=$2, location=$3, age=$4 WHERE userid=$1`
 
-	res, err := db.Exec(sqlStatement, id, user.Name, user.Location, user.Age)
+// 	res, err := db.Exec(sqlStatement, id, user.Name, user.Location, user.Age)
 
-	if err != nil {
-			log.Fatalf("Unable to execute the query. %v", err)
-	}
+// 	if err != nil {
+// 			log.Fatalf("Unable to execute the query. %v", err)
+// 	}
 
-	rowsAffected, err := res.RowsAffected()
+// 	rowsAffected, err := res.RowsAffected()
 
-	if err != nil {
-			log.Fatalf("Error while checking the affected rows. %v", err)
-	}
+// 	if err != nil {
+// 			log.Fatalf("Error while checking the affected rows. %v", err)
+// 	}
 
-	fmt.Printf("Total rows/record affected %v", rowsAffected)
+// 	fmt.Printf("Total rows/record affected %v", rowsAffected)
 
-	return rowsAffected
-}
+// 	return rowsAffected
+// }
+

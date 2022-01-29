@@ -1,5 +1,5 @@
 CREATE TABLE users (
-  userid TEXT PRIMARY KEY,
+  userid uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   streak INT,
   higheststreak INT,
   totallearned INT,
