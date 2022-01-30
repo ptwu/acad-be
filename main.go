@@ -1,15 +1,21 @@
 package main
 
 import (
-    "fmt"
-    "acad-be/router"
-    "log"
-    "net/http"
+	"acad-be/router"
+	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gorilla/handlers"
 )
 
 func main() {
-    r := router.Router()
-    fmt.Println("Starting server on the port 8080...")
+  r := router.Router()
+  credentials := handlers.AllowCredentials()
+  methods := handlers.AllowedMethods([]string{"POST", "GET"})
+  origins := handlers.AllowedOrigins([]string{"*"})
 
-    log.Fatal(http.ListenAndServe(":8080", r))
+  fmt.Println("Starting server on the port 8080...")
+
+  log.Fatal(http.ListenAndServe(":8080", handlers.CORS(credentials, methods, origins)(r)))
 }

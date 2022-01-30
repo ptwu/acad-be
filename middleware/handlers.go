@@ -1,18 +1,19 @@
 package middleware
 
 import (
-		"errors"
-    "database/sql"
-    "encoding/json"
-    "fmt"
-    "acad-be/models"
-    "net/http"
-		"time"
-		"os"
-		"strconv"
-    "github.com/gorilla/mux" 
-    "github.com/joho/godotenv"
-    _ "github.com/lib/pq"
+	"acad-be/models"
+	"database/sql"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"net/http"
+	"os"
+	"strconv"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type response struct {
@@ -63,7 +64,7 @@ func createConnection() *sql.DB {
 // =======================================
 // /api/create-user
 func CreateUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -182,11 +183,8 @@ func getUser(id string, timezoneOffset int) (models.User, error) {
 		&user.LastLearned,
 		&user.UsesTraditional)
 	
-		switch err {
-		case nil:
-			return user, nil
-		default:
-			return user, err
+	if (err != nil) {
+		return user, err
 	}
 	
 	// calculate times from unix timestamps and set to UTC time
