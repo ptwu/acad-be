@@ -84,7 +84,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 // /api/user/{id}?offset={int[-12, 12]}
 func GetUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Context-Type", "application/x-www-form-urlencoded")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Methods", "GET")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	params := mux.Vars(r)
@@ -99,7 +100,6 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-
 	json.NewEncoder(w).Encode(user)
 }
 
@@ -186,7 +186,6 @@ func getUser(id string, timezoneOffset int) (models.User, error) {
 	if (err != nil) {
 		return user, err
 	}
-	
 	// calculate times from unix timestamps and set to UTC time
 	lastTimeObj := time.Unix(user.LastLearned, 0).UTC()
 	currentTimeObj := time.Now().UTC()
@@ -197,31 +196,34 @@ func getUser(id string, timezoneOffset int) (models.User, error) {
 
 	lastDay := lastTimeObj.Day()
 	currentDay := currentTimeObj.Day()
+	var streak int64 = user.Streak
+	var highestStreak int64 = user.HighestStreak
+	var totalLearned int64 = user.TotalLearned
 	if (lastDay != currentDay) {
 		// we are on a new day, set new streak
 		nextDayAfterLastDay := lastTimeObj.Add(time.Hour * 24).Day()
 		if (currentDay != nextDayAfterLastDay) {
 			// reset streak if the user didn't come back the previous day
-			user.Streak = 0
+			streak = 0
 		}
-		user.Streak++
-		if (user.Streak > user.HighestStreak) {
-			user.HighestStreak = user.Streak
+		streak++;
+		if (streak > highestStreak) {
+			highestStreak = streak
 		}
-		if (user.TotalLearned < NumChengyu - 1) {
-			user.TotalLearned++
+		if (totalLearned < NumChengyu - 1) {
+			totalLearned++
 		} else {
 			// The user is done with all the chengyu in the dataset.
 			return user, nil
 		}
 		user.LastLearned = time.Now().Unix()
-		sqlStatement := `UPDATE users SET streak=$2 higheststreak=$3 totallearned=$4 lastlearned=$5 WHERE userid=$1`
-		_, updateErr := db.Exec(sqlStatement, id, user.Streak, user.HighestStreak, user.TotalLearned, user.LastLearned)
+		sqlStatement := `UPDATE users SET streak=$2, higheststreak=$3, totallearned=$4, lastlearned=$5 WHERE userid=$1`
+		_, updateErr := db.Exec(sqlStatement, id, streak, highestStreak, totalLearned, time.Now().Unix())
+
 		if updateErr != nil {
 				return user, errors.New("error while executing UPDATE query")
 		}
 	}
-
 	return user, err
 }
 
