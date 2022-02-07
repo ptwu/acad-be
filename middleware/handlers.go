@@ -246,7 +246,6 @@ func switchUserCharacterBasis(id string, isTraditional bool) error {
 }
 
 func markCurrentCardReviewed(id string) error {
-	// TODO: check whether we can even review this card (<= totalLearned)
 	db := createConnection()
 	defer db.Close()
 
