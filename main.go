@@ -24,10 +24,10 @@ func main() {
   methods := handlers.AllowedMethods([]string{"POST", "GET"})
   origins := handlers.AllowedOrigins([]string{"*"})
 
-  fmt.Println("Starting server on the port 8080...")
   addr, err := determineListenAddress()
   if err != nil {
     log.Fatal(err)
   }
+  fmt.Println("Starting server on the port " + addr)
   log.Fatal(http.ListenAndServe(addr, handlers.CORS(credentials, methods, origins)(r)))
 }
