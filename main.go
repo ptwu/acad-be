@@ -6,8 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/gorilla/handlers"
 )
 
 func determineListenAddress() (string, error) {
@@ -20,14 +18,14 @@ func determineListenAddress() (string, error) {
 
 func main() {
   r := router.Router()
-  credentials := handlers.AllowCredentials()
-  methods := handlers.AllowedMethods([]string{"POST", "GET"})
-  origins := handlers.AllowedOrigins([]string{"*"})
+  // credentials := handlers.AllowCredentials()
+  // methods := handlers.AllowedMethods([]string{"POST", "GET"})
+  // origins := handlers.AllowedOrigins([]string{"*"})
 
   addr, err := determineListenAddress()
   if err != nil {
     log.Fatal(err)
   }
   fmt.Println("Starting server on the port " + addr)
-  log.Fatal(http.ListenAndServe(addr, handlers.CORS(credentials, methods, origins)(r)))
+  log.Fatal(http.ListenAndServe(addr, r))
 }
