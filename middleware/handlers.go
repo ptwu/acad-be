@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -24,17 +23,10 @@ type response struct {
 const NumChengyu = 258
 
 func createConnection() *sql.DB {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-			fmt.Print("error loading env")
-			return nil
-	}
-
 	var dbUser string = os.Getenv("DB_USER")
 	var dbHost string = os.Getenv("DB_HOST")
 	var dbPort int
-	dbPort, err = strconv.Atoi(os.Getenv("DB_PORT"))
+	dbPort, err := strconv.Atoi(os.Getenv("DB_PORT"))
 	if err != nil {
 		fmt.Print("error converting string into int")
 		return nil
@@ -42,8 +34,6 @@ func createConnection() *sql.DB {
 	
 	var dbPassword = os.Getenv("DB_PASS")
 	var dbName = os.Getenv("DB_NAME")
-	fmt.Println(dbPassword)
-	fmt.Println(dbName)
 	db, err := sql.Open("postgres", 
 		fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
 		dbHost, dbPort, dbUser, dbPassword, dbName))
