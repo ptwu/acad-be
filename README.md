@@ -22,3 +22,7 @@ PostgreSQL server.
 
 Contribute potential issues / suggestions in the Issues section of this repo.
 If you have any potential fixes, feel free to make a pull request.
+
+---
+
+_Copyright (C) 2022 Peter Wu_
