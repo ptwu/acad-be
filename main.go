@@ -5,9 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 )
+
+func determineListenAddress() (string, error) {
+  port := os.Getenv("PORT")
+  if port == "" {
+    return "", fmt.Errorf("$PORT not set")
+  }
+  return ":" + port, nil
+}
 
 func main() {
   r := router.Router()
@@ -16,6 +25,9 @@ func main() {
   origins := handlers.AllowedOrigins([]string{"*"})
 
   fmt.Println("Starting server on the port 8080...")
-
-  log.Fatal(http.ListenAndServe(":8080", handlers.CORS(credentials, methods, origins)(r)))
+  addr, err := determineListenAddress()
+  if err != nil {
+    log.Fatal(err)
+  }
+  log.Fatal(http.ListenAndServe(addr, handlers.CORS(credentials, methods, origins)(r)))
 }
