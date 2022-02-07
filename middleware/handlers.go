@@ -42,6 +42,8 @@ func createConnection() *sql.DB {
 	
 	var dbPassword = os.Getenv("DB_PASS")
 	var dbName = os.Getenv("DB_NAME")
+	fmt.Println(dbPassword)
+	fmt.Println(dbName)
 	db, err := sql.Open("postgres", 
 		fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s",
 		dbHost, dbPort, dbUser, dbPassword, dbName))
