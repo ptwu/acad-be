@@ -139,6 +139,7 @@ func ReviewCard(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	err := markCurrentCardReviewed(params["id"])
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusBadRequest)
 		return	
 	}
@@ -216,13 +217,17 @@ func getUser(id string, timezoneOffset int) (models.User, error) {
 			// The user is done with all the chengyu in the dataset.
 			return user, nil
 		}
-		user.LastLearned = time.Now().Unix()
+		var lastLearned int64 = time.Now().Unix()
 		sqlStatement := `UPDATE users SET streak=$2, higheststreak=$3, totallearned=$4, lastlearned=$5 WHERE userid=$1`
-		_, updateErr := db.Exec(sqlStatement, id, streak, highestStreak, totalLearned, time.Now().Unix())
+		_, updateErr := db.Exec(sqlStatement, id, streak, highestStreak, totalLearned, lastLearned)
 
 		if updateErr != nil {
 				return user, errors.New("error while executing UPDATE query")
 		}
+		user.Streak = streak
+		user.HighestStreak = highestStreak
+		user.LastLearned = lastLearned
+		user.TotalLearned = totalLearned
 	}
 	return user, err
 }
@@ -241,34 +246,41 @@ func switchUserCharacterBasis(id string, isTraditional bool) error {
 }
 
 func markCurrentCardReviewed(id string) error {
+	// TODO: check whether we can even review this card (<= totalLearned)
 	db := createConnection()
 	defer db.Close()
 
 	var reviewPtsStr string
-	selectSqlStatement := `SELECT (reviewpoints) FROM users WHERE userid=$1`
+	var totalLearnedStr string
+	selectSqlStatement := `SELECT totallearned, reviewpoints FROM users WHERE userid=$1`
 
 	row := db.QueryRow(selectSqlStatement, id)
-	err := row.Scan(&reviewPtsStr)
+	err := row.Scan(&totalLearnedStr, &reviewPtsStr)
 	if (err != nil) {
 		return errors.New("error while querying for this current user")
 	}
 
 	reviewPts, err := strconv.Atoi(reviewPtsStr)
 	if err != nil {
-		return errors.New("error while converting reviewpoints to int")
+		return errors.New("error while converting reviewPointsStr to int")
 	}
 
-	if (reviewPts < NumChengyu - 1) {
+	totalLearned, err := strconv.Atoi(totalLearnedStr)
+	if err != nil {
+		return errors.New("error while converting totalLearnedStr to int")
+	}
+
+	if (reviewPts < NumChengyu - 1 && reviewPts < totalLearned) {
 		reviewPts = reviewPts + 1
 	} else {
 		return errors.New("cannot review card past max")
 	}
 
-	sqlStatement := `UPDATE users SET reviewpts=$2 WHERE userid=$1`
+	sqlStatement := `UPDATE users SET reviewpoints=$2 WHERE userid=$1`
 
 	_, updateErr := db.Exec(sqlStatement, id, reviewPts)
 	if updateErr != nil {
-			return errors.New("error while executing UPDATE query")
+			return updateErr
 	}
 
 	return err
